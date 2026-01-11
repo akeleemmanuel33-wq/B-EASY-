@@ -1,0 +1,906 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-plan {
+            font-size: 0.85rem;
+            color: #666;
+            background: #f0f0f0;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+        }
+
+        .btn-logout {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #ee5a6f;
+            transform: translateY(-2px);
+        }
+
+        /* Layout */
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 2rem 0;
+            transition: all 0.3s;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin: 0.3rem 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: #f8f9fa;
+            color: #667eea;
+            border-left: 4px solid #667eea;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(255,255,255,0) 100%);
+            color: #667eea;
+            border-left: 4px solid #667eea;
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-width: 100%;
+        }
+
+        /* Welcome Section */
+        .welcome {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .welcome h1 {
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .welcome p {
+            opacity: 0.95;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.3rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .stat-title {
+            color: #666;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            font-size: 1.8rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.4rem;
+            word-break: break-word;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            color: #28a745;
+        }
+
+        .stat-change.negative {
+            color: #dc3545;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1.2rem;
+            color: #333;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            min-height: 50px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Recent Activity */
+        .recent-activity {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: #f8f9fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .activity-time {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 70px;
+                height: calc(100vh - 70px);
+                z-index: 99;
+                box-shadow: 5px 0 20px rgba(0,0,0,0.2);
+            }
+
+            .sidebar.mobile-hidden {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                padding: 1rem;
+                width: 100%;
+            }
+
+            .header {
+                padding: 0.8rem 1rem;
+            }
+
+            .logo {
+                font-size: 1.3rem;
+            }
+
+            .welcome {
+                padding: 1.2rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .welcome h1 {
+                font-size: 1.4rem;
+            }
+
+            .welcome p {
+                font-size: 0.9rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.6rem;
+            }
+
+            .stat-icon {
+                font-size: 1.5rem;
+            }
+
+            .stat-title {
+                font-size: 0.8rem;
+            }
+
+            .stat-change {
+                font-size: 0.75rem;
+            }
+
+            .user-name {
+                display: none;
+            }
+
+            .user-plan {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.5rem;
+            }
+
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 0.95rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+
+            .action-btn {
+                padding: 0.9rem;
+                font-size: 0.9rem;
+                min-height: 48px;
+            }
+
+            .quick-actions,
+            .recent-activity {
+                padding: 1.2rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            .btn-logout {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .nav-link {
+                padding: 0.9rem 1.5rem;
+                font-size: 0.95rem;
+            }
+
+            .nav-icon {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.7rem 0.8rem;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+
+            .user-plan {
+                font-size: 0.65rem;
+                padding: 0.1rem 0.4rem;
+            }
+
+            .btn-logout {
+                padding: 0.4rem 0.7rem;
+                font-size: 0.8rem;
+            }
+
+            .welcome {
+                padding: 1rem;
+            }
+
+            .welcome h1 {
+                font-size: 1.2rem;
+            }
+
+            .welcome p {
+                font-size: 0.85rem;
+            }
+
+            .stat-card {
+                padding: 0.9rem;
+            }
+
+            .stat-value {
+                font-size: 1.4rem;
+            }
+
+            .stat-icon {
+                font-size: 1.3rem;
+            }
+
+            .stat-title {
+                font-size: 0.75rem;
+            }
+
+            .action-btn {
+                padding: 0.8rem;
+                font-size: 0.85rem;
+                min-height: 44px;
+            }
+
+            .section-title {
+                font-size: 1rem;
+            }
+
+            .quick-actions,
+            .recent-activity {
+                padding: 1rem;
+            }
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div class="logo">
+              <span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="currentColor" fill="none" stroke="#141B34" stroke-width="1.5" stroke-linejoin="round">
+‎    <path d="M2 6L8.91302 9.91697C11.4616 11.361 12.5384 11.361 15.087 9.91697L22 6" />
+‎    <path d="M2.01577 13.4756C2.08114 16.5412 2.11383 18.0739 3.24496 19.2094C4.37608 20.3448 5.95033 20.3843 9.09883 20.4634C11.0393 20.5122 12.9607 20.5122 14.9012 20.4634C18.0497 20.3843 19.6239 20.3448 20.7551 19.2094C21.8862 18.0739 21.9189 16.5412 21.9842 13.4756C22.0053 12.4899 22.0053 11.5101 21.9842 10.5244C21.9189 7.45886 21.8862 5.92609 20.7551 4.79066C19.6239 3.65523 18.0497 3.61568 14.9012 3.53657C12.9607 3.48781 11.0393 3.48781 9.09882 3.53656C5.95033 3.61566 4.37608 3.65521 3.24495 4.79065C2.11382 5.92608 2.08114 7.45885 2.01576 10.5244C1.99474 11.5101 1.99475 12.4899 2.01577 13.4756Z" />
+‎</svg>  
+              </span>
+             <span>B-Easy</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div>
+                    <div class="user-name" id="userName">Loading...</div>
+                    <span class="user-plan" id="userPlan">Free Plan</span>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="handleLogout()">Logout</button>
+        </div>
+    </header>
+
+    <!-- Layout -->
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar mobile-hidden" id="sidebar">
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active">
+                            <span class="nav-icon">📊</span>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="customer.html" class="nav-link">
+                            <span class="nav-icon">👥</span>
+                            <span>Customers</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="invoice.html" class="nav-link" onclick="window.location.href='invoice.html'">
+                            <span class="nav-icon">🧾</span>
+                            <span>Invoices</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="record.html" class="nav-link">
+                            <span class="nav-icon">💰</span>
+                            <span>Sales</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="report.html" class="nav-link">
+                            <span class="nav-icon">📈</span>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showComingSoon(); return false;">
+                            <span class="nav-icon">⚙️</span>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Welcome Section -->
+            <div class="welcome">
+                <h1>Welcome back, <span id="businessName">User</span>! 👋</h1>
+                <p>Here's what's happening with your business today.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Today's Sales</span>
+                        <span class="stat-icon">💵</span>
+                    </div>
+                    <div class="stat-value" id="todaySales">₦0</div>
+                    <div class="stat-change">+0% from yesterday</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Total Customers</span>
+                        <span class="stat-icon">👥</span>
+                    </div>
+                    <div class="stat-value" id="totalCustomers">0</div>
+                    <div class="stat-change">Start adding customers!</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Pending Invoices</span>
+                        <span class="stat-icon">📄</span>
+                    </div>
+                    <div class="stat-value" id="pendingInvoices">0</div>
+                    <div class="stat-change">All clear!</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">This Month</span>
+                        <span class="stat-icon">📊</span>
+                    </div>
+                    <div class="stat-value" id="monthSales">₦0</div>
+                    <div class="stat-change">Keep it up!</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="actions-grid">
+                    <button  class="action-btn"  onclick="window.location.href='customer.html'">
+                        <span>➕</span>
+                        <span>Add Customer</span>
+                    </button>
+                    <button class="action-btn" onclick="window.location.href='invoice.html'">
+                        <span>🧾</span>
+                        <span>Create Invoice</span>
+                    </button>
+                    <button class="action-btn" onclick="window.location.href='record.html'">
+                        <span>💰</span>
+                        <span>Record Sale</span>
+                    </button>
+                    <button class="action-btn" onclick="window.location.href='report.html'">
+                        <span>📊</span>
+                        <span>View Reports</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <h2 class="section-title">Recent Activity</h2>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>No activity yet. Start by adding your first customer!</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // ============================================
+        // 🔧 SAME CREDENTIALS AS login.html
+        // ============================================
+        const SUPABASE_URL = 'https://wnjxyuyuvbfkmaemnwnj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Induanh5dXl1dmJma21hZW1ud25qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5ODkwMTAsImV4cCI6MjA4MzU2NTAxMH0.AvSfugR85jbWaEyQ5qAp2uNjdghXPt4Y8guDys5P4R4';
+        
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        // ============================================
+        // CHECK AUTHENTICATION
+        // ============================================
+        async function checkAuth() {
+            if (!supabaseClient) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Load user profile
+                await loadUserProfile(session.user.id);
+                await loadDashboardData(session.user.id);
+                
+                // Show page after auth check is complete
+                document.body.classList.add('loaded');
+                
+            } catch (error) {
+                console.error('Auth error:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // ============================================
+        // LOAD USER PROFILE
+        // ============================================
+        async function loadUserProfile(userId) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+
+                if (error) throw error;
+
+                if (data) {
+                    document.getElementById('businessName').textContent = data.business_name || 'User';
+                    document.getElementById('userName').textContent = data.business_name || 'User';
+                    document.getElementById('userPlan').textContent = data.plan === 'pro' ? 'Pro Plan ⭐' : 'Free Plan';
+                    
+                    // Set avatar initial
+                    const initial = (data.business_name || 'U').charAt(0).toUpperCase();
+                    document.getElementById('userAvatar').textContent = initial;
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // ============================================
+        // LOAD DASHBOARD DATA
+        // ============================================
+        async function loadDashboardData(userId) {
+            try {
+                // Load customers count
+                const { count: customersCount } = await supabaseClient
+                    .from('customers')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', userId);
+
+                document.getElementById('totalCustomers').textContent = customersCount || 0;
+
+                // Load invoices count
+                const { count: invoicesCount } = await supabaseClient
+                    .from('invoices')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', userId)
+                    .eq('status', 'unpaid');
+
+                document.getElementById('pendingInvoices').textContent = invoicesCount || 0;
+
+                // Load today's sales
+                const today = new Date().toISOString().split('T')[0];
+                const { data: todaySalesData } = await supabaseClient
+                    .from('sales')
+                    .select('amount')
+                    .eq('user_id', userId)
+                    .eq('sale_date', today);
+
+                const todayTotal = todaySalesData?.reduce((sum, sale) => sum + parseFloat(sale.amount), 0) || 0;
+                document.getElementById('todaySales').textContent = `₦${todayTotal.toLocaleString()}`;
+
+                // Load month sales
+                const monthStart = new Date();
+                monthStart.setDate(1);
+                const { data: monthSalesData } = await supabaseClient
+                    .from('sales')
+                    .select('amount')
+                    .eq('user_id', userId)
+                    .gte('sale_date', monthStart.toISOString().split('T')[0]);
+
+                const monthTotal = monthSalesData?.reduce((sum, sale) => sum + parseFloat(sale.amount), 0) || 0;
+                document.getElementById('monthSales').textContent = `₦${monthTotal.toLocaleString()}`;
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // ============================================
+        // LOGOUT
+        // ============================================
+        async function handleLogout() {
+            if (!supabaseClient) return;
+
+            const confirm = window.confirm('Are you sure you want to logout?');
+            if (!confirm) return;
+
+            try {
+                await supabaseClient.auth.signOut();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Error logging out. Please try again.');
+            }
+        }
+
+        // ============================================
+        // SIDEBAR TOGGLE (MOBILE)
+        // ============================================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-hidden');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.add('mobile-hidden');
+                }
+            }
+        });
+
+        // ============================================
+        // COMING SOON ALERT
+        // ============================================
+        function showComingSoon() {
+            alert('This feature is coming soon! We\'re building it in the next steps. 🚀');
+        }
+
+        // Check auth on page load
+        checkAuth();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizEasy - Sales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-logout {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #ee5a6f;
+        }
+
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 260px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 2rem 0;
+            transition: all 0.3s;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin: 0.3rem 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: #f8f9fa;
+            color: #667eea;
+            border-left: 4px solid #667eea;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(255,255,255,0) 100%);
+            color: #667eea;
+            border-left: 4px solid #667eea;
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-width: 100%;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.9rem 1.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Stats Summary */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .filter-input {
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-filter {
+            padding: 0.8rem 1.5rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-filter:hover {
+            background: #5568d3;
+        }
+
+        /* Sales List */
+        .sales-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .sales-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .sale-item {
+            background: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .sale-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .sale-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .sale-amount {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .sale-description {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .sale-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #999;
+            flex-wrap: wrap;
+        }
+
+        .sale-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .btn-delete {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #ee5a6f;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: #f0f0f0;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+        }
+
+        .payment-method {
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .payment-method:hover {
+            border-color: #667eea;
+        }
+
+        .payment-method.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .payment-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-text {
+            color: #999;
+            margin-bottom: 2rem;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 70px;
+                height: calc(100vh - 70px);
+                z-index: 99;
+                box-shadow: 5px 0 20px rgba(0,0,0,0.2);
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .sale-item {
+                grid-template-columns: 1fr;
+            }
+
+            .sale-actions {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <a href="dashboard.html" class="logo">
+                <span>💼</span>
+                <span>BizEasy</span>
+            </a>
+        </div>
+        <div class="header-right">
+            <button class="btn-logout" onclick="handleLogout()">Logout</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar mobile-hidden" id="sidebar">
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <span class="nav-icon">📊</span>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="customers.html" class="nav-link">
+                            <span class="nav-icon">👥</span>
+                            <span>Customers</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="invoices.html" class="nav-link">
+                            <span class="nav-icon">🧾</span>
+                            <span>Invoices</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="sales.html" class="nav-link active">
+                            <span class="nav-icon">💰</span>
+                            <span>Sales</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showComingSoon(); return false;">
+                            <span class="nav-icon">📈</span>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" onclick="showComingSoon(); return false;">
+                            <span class="nav-icon">⚙️</span>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div id="alertBox" class="alert"></div>
+
+            <div class="page-header">
+                <h1 class="page-title">Sales</h1>
+                <button class="btn-primary" onclick="openAddModal()">
+                    <span>➕</span>
+                    <span>Record Sale</span>
+                </button>
+            </div>
+
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <div class="stat-label">Today's Sales</div>
+                    <div class="stat-value" id="todaySales">₦0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">This Week</div>
+                    <div class="stat-value" id="weekSales">₦0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">This Month</div>
+                    <div class="stat-value" id="monthSales">₦0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Sales</div>
+                    <div class="stat-value" id="totalSalesCount">0</div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Start Date</label>
+                        <input type="date" class="filter-input" id="startDate">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">End Date</label>
+                        <input type="date" class="filter-input" id="endDate">
+                    </div>
+                    <div class="filter-group">
+                        <button class="btn-filter" onclick="applyFilters()">Apply Filter</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales List -->
+            <div class="sales-container">
+                <div id="salesList" class="sales-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Sale Modal -->
+    <div id="saleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Record Sale</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="saleForm" onsubmit="handleSubmit(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Amount (₦) *</label>
+                        <input type="number" class="form-input" id="saleAmount" placeholder="0.00" min="0" step="0.01" required autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Customer (Optional)</label>
+                        <select class="form-select" id="customerId">
+                            <option value="">No customer / Walk-in</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Payment Method *</label>
+                        <div class="payment-methods">
+                            <div class="payment-method selected" onclick="selectPayment('cash')" data-method="cash">
+                                <div class="payment-icon">💵</div>
+                                <div>Cash</div>
+                            </div>
+                            <div class="payment-method" onclick="selectPayment('transfer')" data-method="transfer">
+                                <div class="payment-icon">📱</div>
+                                <div>Transfer</div>
+                            </div>
+                            <div class="payment-method" onclick="selectPayment('card')" data-method="card">
+                                <div class="payment-icon">💳</div>
+                                <div>Card</div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="paymentMethod" value="cash">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description (Optional)</label>
+                        <input type="text" class="form-input" id="saleDescription" placeholder="What was sold?">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Sale</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        SUPABASE_URL = 'https://wnjxyuyuvbfkmaemnwnj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Induanh5dXl1dmJma21hZW1ud25qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5ODkwMTAsImV4cCI6MjA4MzU2NTAxMH0.AvSfugR85jbWaEyQ5qAp2uNjdghXPt4Y8guDys5P4R4';
+        
+        const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        let currentUserId = null;
+        let allSales = [];
+        let allCustomers = [];
+
+        async function init() {
+            if (!supabaseClient) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                currentUserId = session.user.id;
+                
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('endDate').value = today;
+                
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+                
+                await loadCustomers();
+                await loadSales();
+                await calculateStats();
+                document.body.classList.add('loaded');
+                
+            } catch (error) {
+                console.error('Auth error:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function loadCustomers() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('customers')
+                    .select('*')
+                    .eq('user_id', currentUserId)
+                    .order('name');
+
+                if (error) throw error;
+
+                allCustomers = data || [];
+                populateCustomerDropdown();
+                
+            } catch (error) {
+                console.error('Error loading customers:', error);
+            }
+        }
+
+        function populateCustomerDropdown() {
+            const select = document.getElementById('customerId');
+            select.innerHTML = '<option value="">No customer / Walk-in</option>';
+            
+            allCustomers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.id;
+                option.textContent = customer.name;
+                select.appendChild(option);
+            });
+        }
+
+        async function loadSales() {
+            try {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+
+                let query = supabaseClient
+                    .from('sales')
+                    .select('*, customers(name)')
+                    .eq('user_id', currentUserId)
+                    .order('sale_date', { ascending: false })
+                    .order('created_at', { ascending: false });
+
+                if (startDate) {
+                    query = query.gte('sale_date', startDate);
+                }
+                if (endDate) {
+                    query = query.lte('sale_date', endDate);
+                }
+
+                const { data, error } = await query;
+
+                if (error) throw error;
+
+                allSales = data || [];
+                renderSales(allSales);
+                
+            } catch (error) {
+                console.error('Error loading sales:', error);
+                showAlert('Error loading sales: ' + error.message, 'error');
+            }
+        }
+
+        function renderSales(sales) {
+            const list = document.getElementById('salesList');
+            
+            if (sales.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">💰</div>
+                        <h3 class="empty-title">No sales recorded yet</h3>
+                        <p class="empty-text">Start recording your daily sales!</p>
+                        <button class="btn-primary" onclick="openAddModal()">
+                            <span>➕</span>
+                            <span>Record First Sale</span>
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = sales.map(sale => {
+                const amount = parseFloat(sale.amount || 0);
+                const customerName = sale.customers?.name || 'Walk-in Customer';
+                const saleDate = new Date(sale.sale_date).toLocaleDateString();
+                const paymentMethod = sale.payment_method || 'cash';
+                const description = sale.description || 'Sale';
+                
+                const methodIcon = {
+                    'cash': '💵',
+                    'transfer': '📱',
+                    'card': '💳'
+                }[paymentMethod] || '💰';
+                
+                return `
+                    <div class="sale-item">
+                        <div class="sale-info">
+                            <div class="sale-amount">₦${amount.toLocaleString()}</div>
+                            <div class="sale-description">${description}</div>
+                            <div class="sale-meta">
+                                <span>👤 ${customerName}</span>
+                                <span>${methodIcon} ${paymentMethod}</span>
+                                <span>📅 ${saleDate}</span>
+                            </div>
+                        </div>
+                        <div class="sale-actions">
+                            <button class="btn-small btn-delete" onclick="deleteSale('${sale.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function calculateStats() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                const { data: todayData } = await supabaseClient
+                    .from('sales')
+                    .select('amount')
+                    .eq('user_id', currentUserId)
+                    .eq('sale_date', today);
+                
+                const todayTotal = todayData?.reduce((sum, sale) => sum + parseFloat(sale.amount), 0) || 0;
+                document.getElementById('todaySales').textContent = `₦${todayTotal.toLocaleString()}`;
+
+                const weekStart = new Date();
+                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                const { data: weekData } = await supabaseClient
+                    .from('sales')
+                    .select('amount')
+                    .eq('user_id', currentUserId)
+                    .gte('sale_date', weekStart.toISOString().split('T')[0]);
+                
+                const weekTotal = weekData?.reduce((sum, sale) => sum + parseFloat(sale.amount), 0) || 0;
+                document.getElementById('weekSales').textContent = `₦${weekTotal.toLocaleString()}`;
+
+                const monthStart = new Date();
+                monthStart.setDate(1);
+                const { data: monthData } = await supabaseClient
+                    .from('sales')
+                    .select('amount')
+                    .eq('user_id', currentUserId)
+                    .gte('sale_date', monthStart.toISOString().split('T')[0]);
+                
+                const monthTotal = monthData?.reduce((sum, sale) => sum + parseFloat(sale.amount), 0) || 0;
+                document.getElementById('monthSales').textContent = `₦${monthTotal.toLocaleString()}`;
+
+                const { count } = await supabaseClient
+                    .from('sales')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', currentUserId);
+                
+                document.getElementById('totalSalesCount').textContent = count || 0;
+                
+            } catch (error) {
+                console.error('Error calculating stats:', error);
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('saleModal').classList.add('show');
+            document.getElementById('saleForm').reset();
+            selectPayment('cash');
+        }
+
+        function closeModal() {
+            document.getElementById('saleModal').classList.remove('show');
+        }
+
+        function selectPayment(method) {
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            document.querySelector(`[data-method="${method}"]`).classList.add('selected');
+            document.getElementById('paymentMethod').value = method;
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            const amount = parseFloat(document.getElementById('saleAmount').value);
+            const customerId = document.getElementById('customerId').value || null;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const description = document.getElementById('saleDescription').value || null;
+
+            if (!amount || amount <= 0) {
+                showAlert('Please enter a valid amount', 'error');
+                return;
+            }
+
+            const saleData = {
+                user_id: currentUserId,
+                customer_id: customerId,
+                amount: amount,
+                payment_method: paymentMethod,
+                description: description,
+                sale_date: new Date().toISOString().split('T')[0]
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('sales')
+                    .insert([saleData]);
+
+                if (error) throw error;
+
+                showAlert('Sale recorded successfully!', 'success');
+                closeModal();
+                await loadSales();
+                await calculateStats();
+                
+            } catch (error) {
+                console.error('Error recording sale:', error);
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteSale(saleId) {
+            if (!confirm('Are you sure you want to delete this sale?')) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('sales')
+                    .delete()
+                    .eq('id', saleId);
+
+                if (error) throw error;
+
+                showAlert('Sale deleted successfully!', 'success');
+                await loadSales();
+                await calculateStats();
+                
+            } catch (error) {
+                console.error('Error deleting sale:', error);
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function applyFilters() {
+            await loadSales();
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert alert-${type} show`;
+            alertBox.textContent = message;
+            
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        async function handleLogout() {
+            if (!supabaseClient) return;
+            if (!confirm('Are you sure you want to logout?')) return;
+
+            try {
+                await supabaseClient.auth.signOut();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-hidden');
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.add('mobile-hidden');
+                }
+            }
+        });
+
+        document.getElementById('saleModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+
+        function showComingSoon() {
+            alert('This feature is coming soon! 🚀');
+        }
+
+        init();
+    </script>
+</body>
+</html>
